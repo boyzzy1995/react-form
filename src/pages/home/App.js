@@ -1,8 +1,9 @@
 import React from 'react';
-import axios from 'axios';
-import ChildTable from './ChildTable';
+import ChildTable from './components/ChildTable';
+import initColumn from './constant/columns';
+import { getData } from '../../api/home'
 import './App.css';
-import { Layout, Menu, Breadcrumb, Table, Tag, Button, Modal, Input } from 'antd';
+import { Layout, Menu, Breadcrumb, Table, Modal, Input } from 'antd';
 const { Header, Content } = Layout;
 const { Search } = Input;
 
@@ -12,75 +13,12 @@ class App extends React.PureComponent {
     this.state = {
       data: [],
       visible: false,
-      columns: [
-        {
-          title: 'Name',
-          dataIndex: 'name',
-          key: 'name',
-          align: 'center'
-        },
-        {
-          title: 'Description',
-          dataIndex: 'description',
-          key: 'description',
-          ellipsis: true,
-          width: 300,
-          align: 'center'
-        },
-        {
-          title: 'Image',
-          dataIndex: 'image',
-          key: 'image',
-          align: 'center',
-          render: url => (
-            <img src={url} alt=""></img>
-          )
-        },
-        {
-          title: 'BaseURL',
-          dataIndex: 'baseURL',
-          key: 'baseURL',
-          align: 'center',
-          render: text => (
-            <a href={text}>链接</a>
-          )
-        },
-        {
-          title: 'Tags',
-          key: 'tags',
-          dataIndex: 'tags',
-          align: 'center',
-          render: tags => (
-            <>
-              {tags.map(tag => {
-                let color = tag.length > 5 ? 'geekblue' : 'green';
-                if (tag === 'loser') {
-                  color = 'volcano';
-                }
-                return (
-                  <Tag color={color} key={tag} className="ant-tags">
-                    {tag}
-                  </Tag>
-                );
-              })}
-            </>
-          ),
-        },
-        {
-          title: 'Properties',
-          key: 'properties',
-          dataIndex: 'properties',
-          align: 'center',
-          render: (obj, record) => (
-            <Button onClick={this.handleClick.bind(this, record)}>Toggle</Button>
-          ),
-        },
-      ],
+      columns: initColumn.call(this),
       originalData: []
     }
   }
   componentDidMount() {
-    axios.get('http://www.mocky.io/v2/5ea28891310000358f1ef182').then(res => {
+    getData().then(res => {
       this.setState({
         data: res.data.apis
       })
@@ -96,8 +34,7 @@ class App extends React.PureComponent {
     this.setState({
       visible: false
     });
-  };
-
+  }
   handleCancel(e) {
     this.setState({
       visible: false
@@ -107,7 +44,7 @@ class App extends React.PureComponent {
     const value = e.target.value;
     if (this.state.originalData.length === 0) {
       const originalData = JSON.parse(JSON.stringify(this.state.data));
-      this.setState((state) => {
+      this.setState(() => {
         return {
           originalData
         }
@@ -118,7 +55,6 @@ class App extends React.PureComponent {
       const filterData = this.state.originalData.filter(record => {
         return record.tags.indexOf(value) > -1;
       })
-      console.log(filterData)
       this.setState({
         data: filterData,
       })
@@ -148,7 +84,7 @@ class App extends React.PureComponent {
         <div className="site-layout-content">
           <Search
             placeholder="input search text"
-            onSearch={value => console.log(value)}
+            onSearch={this.hanldeInputChange.bind(this)}
             style={{ width: 200 }}
             className="search-input"
             onChange={this.hanldeInputChange.bind(this)}
